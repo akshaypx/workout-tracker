@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import initializeDatabase from "./src/authDb.js";
 import authRouter from "./src/routes/authRoute.js";
+import protectedRouter from "./src/routes/protectedRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -15,6 +16,7 @@ let db;
 app.use(bodyParser.json());
 
 app.use("/auth", authRouter);
+app.use("/protected", protectedRouter);
 app.get("/test", (req, res) => res.send("hello world"));
 
 app.listen(PORT, () => console.log(`Server listening at ${PORT}`));
