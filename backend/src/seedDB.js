@@ -25,14 +25,14 @@ function connectToDatabase() {
 function createTable(db) {
   db.run(
     `
-    CREATE TABLE IF NOT EXISTS exercises
-    (
-      title           VARCHAR(500),
-      desc            VARCHAR(1000),
-      type            VARCHAR(50),
-      body_part       VARCHAR(50),
-      equipment       VARCHAR(50),
-      level           VARCHAR(50)
+    CREATE TABLE IF NOT EXISTS exercises (
+      exercise_id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      title       TEXT NOT NULL,
+      desc        TEXT,
+      type        TEXT,
+      body_part   TEXT,
+      equipment   TEXT,
+      level       TEXT
     )
   `,
     (error) => {

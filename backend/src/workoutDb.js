@@ -3,16 +3,18 @@ import { open } from "sqlite";
 
 async function initializeDatabase() {
   const db = await open({
-    filename: "./auth.db",
+    filename: "./workout.db",
     driver: sqlite3.Database,
   });
 
   await db.exec(
     `
-        CREATE TABLE IF NOT EXISTS users(
-        user_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE,
-        password TEXT
+        CREATE TABLE IF NOT EXISTS workouts(
+        workout_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        exercise_id INTEGER,
+        start_time TEXT,
+        end_time TEXT
         )
         `
   );
