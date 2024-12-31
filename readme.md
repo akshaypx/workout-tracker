@@ -1,27 +1,3 @@
-"https://roadmap.sh/projects/fitness-workout-tracker"
-
-Datasets for Seeding Exercise data
-https://www.kaggle.com/datasets/niharika41298/gym-exercise-data/data
-
-Populate env with following
-
-PORT = 8000
-JWT_SECRET_KEY = your_jwt_secret_key
-TOKEN_HEADER_KEY = your_token_header_key
-JWT_EXPIRY=1h
-
-TODOS-
-[] Create Workout: Allow users to create workouts composed of multiple exercises.
-[] Update Workout: Allow users to update workouts and add comments.
-[] Delete Workout: Allow users to delete workouts.
-[] Schedule Workouts: Allow users to schedule workouts for specific dates and times.
-[] List Workouts: List active or pending workouts sorted by date and time.
-[] Generate Reports: Generate reports on past workouts and progress.
-
-```
-node .\src\seedDB.js
-```
-
 # Workout Tracker Database Schema
 
 This README provides an explanation of the **ER Diagram** and schema for the Workout Tracker app. The schema is designed using a relational database approach and supports features such as user management, workout planning, exercise cataloging, scheduling, and progress tracking.
@@ -231,3 +207,42 @@ ORDER BY w.scheduled_date ASC;
 ```
 
 ---
+
+## **Additional Resources**
+
+- **Project Roadmap**: [Fitness Workout Tracker](https://roadmap.sh/projects/fitness-workout-tracker)
+- **Datasets for Seeding Exercise Data**: [Gym Exercise Data on Kaggle](https://www.kaggle.com/datasets/niharika41298/gym-exercise-data/data)
+
+---
+
+## **Environment Variables**
+
+Ensure the following variables are set in your environment:
+
+```
+PORT = 8000
+JWT_SECRET_KEY = your_jwt_secret_key
+TOKEN_HEADER_KEY = your_token_header_key
+JWT_EXPIRY = 1h
+```
+
+---
+
+## **To-Do List**
+
+- [ ] **Create Workout**: Allow users to create workouts composed of multiple exercises.
+- [ ] **Update Workout**: Allow users to update workouts and add comments.
+- [ ] **Delete Workout**: Allow users to delete workouts.
+- [ ] **Schedule Workouts**: Allow users to schedule workouts for specific dates and times.
+- [ ] **List Workouts**: List active or pending workouts sorted by date and time.
+- [ ] **Generate Reports**: Generate reports on past workouts and progress.
+
+---
+
+## **Seeding the Database**
+
+Run the following command to seed the database with exercise data:
+
+```
+node .\src\seedDB.js
+```
