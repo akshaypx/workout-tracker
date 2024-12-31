@@ -3,20 +3,12 @@ import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-import initializeDatabase from "../authDb.js";
-
 dotenv.config();
 
 const authRouter = express.Router();
 
-let db;
-
-(async () => {
-  db = await initializeDatabase();
-  console.log("authDb initialized");
-})();
-
 authRouter.post("/register", async (req, res) => {
+  let db = req.db;
   const { username, email, password } = req.body;
 
   if (!username || !password || !email) {
@@ -43,6 +35,7 @@ authRouter.post("/register", async (req, res) => {
 });
 
 authRouter.post("/login", async (req, res) => {
+  let db = req.db;
   const { username, email, password } = req.body;
 
   if ((!username && !email) || !password) {

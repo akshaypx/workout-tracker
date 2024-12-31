@@ -1,9 +1,7 @@
 import express from "express";
 import bodyParser from "body-parser";
-import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
-import jwt from "jsonwebtoken";
-import initializeDatabase from "./src/authDb.js";
+import { initializeDatabase, initializeAllTables } from "./src/db/index.js";
 import authRouter from "./src/routes/authRoute.js";
 import protectedRouter from "./src/routes/protectedRoutes.js";
 
@@ -12,6 +10,16 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 let db;
+
+(async () => {
+  db = await initializeDatabase();
+  db = await initializeAllTables();
+})();
+
+app.use((req, res, next) => {
+  req.db = db;
+  next();
+});
 
 app.use(bodyParser.json());
 

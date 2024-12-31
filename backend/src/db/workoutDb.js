@@ -1,15 +1,11 @@
-import sqlite3 from "sqlite3";
-import { open } from "sqlite";
+import { initializeDatabase } from "./index.js";
 
-async function initializeDatabase() {
-  const db = await open({
-    filename: "./workout.db",
-    driver: sqlite3.Database,
-  });
+const initWorkoutTable = async () => {
+  const db = await initializeDatabase();
 
   await db.exec(
     `
-        CREATE TABLE IF NOT EXISTS workouts(
+    CREATE TABLE IF NOT EXISTS workouts(
         workout_id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,
         name TEXT NOT NULL,
@@ -18,10 +14,9 @@ async function initializeDatabase() {
         created_at TEXT DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES Users(user_id)
         )
-        `
+    `
   );
 
-  return db;
-}
-
-export default initializeDatabase;
+  console.log("Workout table initialized.");
+};
+export default initWorkoutTable;

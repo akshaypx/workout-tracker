@@ -1,11 +1,7 @@
-import sqlite3 from "sqlite3";
-import { open } from "sqlite";
+import { initializeDatabase } from "./index.js";
 
-async function initializeDatabase() {
-  const db = await open({
-    filename: "./auth.db",
-    driver: sqlite3.Database,
-  });
+const initializeAuthTable = async () => {
+  const db = await initializeDatabase();
 
   await db.exec(
     `
@@ -15,10 +11,10 @@ async function initializeDatabase() {
             email TEXT NOT NULL UNIQUE,
             password_hash TEXT NOT NULL
         )
-        `
+    `
   );
 
-  return db;
-}
+  console.log("Users table initialized");
+};
 
-export default initializeDatabase;
+export default initializeAuthTable;

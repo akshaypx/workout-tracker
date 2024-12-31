@@ -1,19 +1,7 @@
 import express from "express";
 import authenticateToken from "../middlewares/authMiddleware.js";
-import initializeWorkoutsDatabase from "../workoutDb.js";
-import initializeWorkoutExercisesDatabase from "../workoutExercisesDb.js";
 
 const protectedRouter = express.Router();
-
-let workoutDb;
-let workoutExercisesDb;
-
-(async () => {
-  workoutDb = await initializeWorkoutsDatabase();
-  console.log("workoutDb initialized");
-  workoutExercisesDb = await initializeWorkoutExercisesDatabase();
-  console.log("workoutExercisesDb initialized");
-})();
 
 protectedRouter.get("/testprotection", authenticateToken, (req, res) => {
   res
@@ -23,8 +11,10 @@ protectedRouter.get("/testprotection", authenticateToken, (req, res) => {
 
 // list all workouts
 protectedRouter.get("/list-workouts", authenticateToken, async (req, res) => {
+  let db = req.db;
+
   try {
-    const workouts = await workoutDb.all(
+    const workouts = await db.all(
       `SELECT * 
       FROM workouts 
       WHERE user_id = ? AND status IN ('active', 'pending') 
@@ -46,6 +36,8 @@ protectedRouter.get("/list-workouts", authenticateToken, async (req, res) => {
 
 // create a workout
 protectedRouter.post("/create-workout", authenticateToken, async (req, res) => {
+  let db = req.db;
+
   const { exercise_id, scheduled_date, name } = req.body;
   const user_id = req.user.id;
 
@@ -57,7 +49,7 @@ protectedRouter.post("/create-workout", authenticateToken, async (req, res) => {
   }
 
   try {
-    await workoutDb.run(
+    await db.run(
       `
       INSERT INTO workouts (user_id, name, status, scheduled_date) 
       VALUES (?, ?, 'pending', ?)
@@ -73,6 +65,8 @@ protectedRouter.post("/create-workout", authenticateToken, async (req, res) => {
 
 //add exercises to a workout
 protectedRouter.post("/add-exercises", authenticateToken, async (req, res) => {
+  let db = req.db;
+
   const { workout_id, exercise_id, sets, reps, weight, duration } = req.body;
 
   if (!workout_id || !exercise_id || !sets || !reps || !weight || !duration) {
@@ -83,7 +77,7 @@ protectedRouter.post("/add-exercises", authenticateToken, async (req, res) => {
   }
 
   try {
-    await workoutExercisesDb.run(
+    await db.run(
       `
       INSERT INTO workout_exercises (workout_id, exercise_id, sets, reps, weight, duration) 
       VALUES (?, ?, ?, ?, ?, ?)
@@ -101,6 +95,8 @@ protectedRouter.post("/add-exercises", authenticateToken, async (req, res) => {
 
 //update a workout
 protectedRouter.post("/update-workout", authenticateToken, async (req, res) => {
+  let db = req.db;
+
   const { workout_id, name, status, scheduled_date } = req.body;
 
   const user_id = req.user.id;
@@ -112,7 +108,7 @@ protectedRouter.post("/update-workout", authenticateToken, async (req, res) => {
   }
 
   try {
-    const workout = workoutDb.all(
+    const workout = db.all(
       `SELECT * 
       FROM workouts 
       WHERE workout_id = ? AND user_id = ?;
@@ -123,7 +119,7 @@ protectedRouter.post("/update-workout", authenticateToken, async (req, res) => {
       return res.status(404).json({ message: "Workout does not exist." });
     }
 
-    await workoutDb.run(
+    await db.run(
       `
       UPDATE workouts 
       SET name = ?, status = ?, scheduled_date = ?, updated_at = CURRENT_TIMESTAMP
@@ -149,6 +145,8 @@ protectedRouter.post(
   "/update-workout-exercise",
   authenticateToken,
   async (req, res) => {
+    let db = req.db;
+
     const { workout_exercise_id, sets, reps, weight, duration } = req.body;
 
     const user_id = req.user.id;
@@ -160,7 +158,7 @@ protectedRouter.post(
     }
 
     try {
-      const workoutExercise = workoutExercisesDb.all(
+      const workoutExercise = db.all(
         `SELECT * 
       FROM workout_exercises 
       WHERE workout_exercise_id = ?
@@ -173,7 +171,7 @@ protectedRouter.post(
           .json({ message: "Workout Exercise does not exist." });
       }
 
-      await workoutExercisesDb.run(
+      await db.run(
         `
       UPDATE workout_exercises 
       SET sets = ?, reps = ?, weight = ?, duration = ? 
@@ -201,6 +199,8 @@ protectedRouter.post(
 
 //delete workout
 protectedRouter.post("/delete-workout", authenticateToken, async (req, res) => {
+  let db = req.db;
+
   const { workout_id } = req.body;
   const user_id = req.user.id;
 
@@ -209,7 +209,7 @@ protectedRouter.post("/delete-workout", authenticateToken, async (req, res) => {
   }
 
   try {
-    await workoutDb.run(
+    await db.run(
       `
         DELETE FROM workouts 
         WHERE workout_id = ? AND user_id = ?;
@@ -228,6 +228,8 @@ protectedRouter.post(
   "/schedule-workout",
   authenticateToken,
   async (req, res) => {
+    let db = req.db;
+
     const { workout_id, scheduled_date } = req.body;
     const user_id = req.user.id;
 
@@ -236,7 +238,7 @@ protectedRouter.post(
     }
 
     try {
-      await workoutDb.run(
+      await db.run(
         `
         UPDATE workouts 
         SET scheduled_date = ?
@@ -248,6 +250,45 @@ protectedRouter.post(
     } catch (err) {
       console.log(err);
       return res.status(400).json({ message: "Error scheduling workout." });
+    }
+  }
+);
+
+//get report completed workouts
+protectedRouter.post(
+  "/reports-completed-workouts",
+  authenticateToken,
+  async (req, res) => {
+    let db = req.db;
+
+    const user_id = req.user.id;
+
+    if (!user_id) {
+      return res.status(400).json({ message: "Invalid request." });
+    }
+
+    try {
+      const report = await db.all(
+        `
+        SELECT w.workout_id, w.name, w.scheduled_date, w.created_at, 
+              COUNT(we.exercise_id) AS total_exercises, 
+              SUM(we.sets * we.reps) AS total_reps, 
+              SUM(we.weight * we.sets) AS total_weight, 
+              SUM(we.duration) AS total_duration
+        FROM workouts w
+        LEFT JOIN workout_exercises we ON w.workout_id = we.workout_id
+        WHERE w.user_id = ? AND w.status = 'completed'
+        GROUP BY w.workout_id
+        ORDER BY w.scheduled_date DESC
+        `,
+        [user_id]
+      );
+      return res.status(200).json({ report });
+    } catch (err) {
+      console.log(err);
+      return res
+        .status(400)
+        .json({ message: "Error generating completed workout report." });
     }
   }
 );
