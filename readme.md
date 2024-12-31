@@ -17,3 +17,7 @@ TODOS-
 [] Schedule Workouts: Allow users to schedule workouts for specific dates and times.
 [] List Workouts: List active or pending workouts sorted by date and time.
 [] Generate Reports: Generate reports on past workouts and progress.
+
+```
+node .\src\seedDB.js
+```

@@ -11,10 +11,12 @@ async function initializeDatabase() {
     `
         CREATE TABLE IF NOT EXISTS workouts(
         workout_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER,
-        exercise_id INTEGER,
-        start_time TEXT,
-        end_time TEXT
+        user_id INTEGER NOT NULL,
+        name TEXT NOT NULL,
+        status TEXT CHECK(status IN ('active', 'pending', 'completed')) DEFAULT 'pending',
+        scheduled_date TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES Users(user_id)
         )
         `
   );

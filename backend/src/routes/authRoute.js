@@ -13,7 +13,7 @@ let db;
 
 (async () => {
   db = await initializeDatabase();
-  console.log("Db initialized");
+  console.log("authDb initialized");
 })();
 
 authRouter.post("/register", async (req, res) => {
@@ -62,14 +62,14 @@ authRouter.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Credentials do not match." });
     }
     const token = jwt.sign(
-      { id: user.id, username: user.username, email: user.email },
+      { id: user.user_id, username: user.username, email: user.email },
       process.env.JWT_SECRET_KEY,
       {
         expiresIn: process.env.JWT_EXPIRY,
       }
     );
 
-    res.status(200).json({ token });
+    return res.status(200).json({ token });
   } catch (error) {
     console.log("Error details:", error);
     res.status(500).json({ message: "Error logging in." });
