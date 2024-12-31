@@ -144,4 +144,59 @@ protectedRouter.post("/update-workout", authenticateToken, async (req, res) => {
   }
 });
 
+//update workout exercise
+protectedRouter.post(
+  "/update-workout-exercise",
+  authenticateToken,
+  async (req, res) => {
+    const { workout_exercise_id, sets, reps, weight, duration } = req.body;
+
+    const user_id = req.user.id;
+
+    if (!workout_exercise_id || !user_id) {
+      return res.status(400).json({
+        message: "Invalid request body, missing required fields.",
+      });
+    }
+
+    try {
+      const workoutExercise = workoutExercisesDb.all(
+        `SELECT * 
+      FROM workout_exercises 
+      WHERE workout_exercise_id = ?
+      `,
+        [workout_exercise_id]
+      );
+      if (!workoutExercise) {
+        return res
+          .status(404)
+          .json({ message: "Workout Exercise does not exist." });
+      }
+
+      await workoutExercisesDb.run(
+        `
+      UPDATE workout_exercises 
+      SET sets = ?, reps = ?, weight = ?, duration = ? 
+      WHERE workout_exercise_id = ?
+      `,
+        [
+          sets || workoutExercise.sets,
+          reps || workoutExercise.reps,
+          weight || workoutExercise.weight,
+          duration || workoutExercise,
+          workout_exercise_id,
+        ]
+      );
+      return res
+        .status(201)
+        .json({ message: "Workout Exercise Updated successfully." });
+    } catch (err) {
+      console.log(err);
+      return res
+        .status(400)
+        .json({ message: "Error updating workout exercise." });
+    }
+  }
+);
+
 export default protectedRouter;
