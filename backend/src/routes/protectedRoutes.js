@@ -223,4 +223,33 @@ protectedRouter.post("/delete-workout", authenticateToken, async (req, res) => {
   }
 });
 
+//schedule workout
+protectedRouter.post(
+  "/schedule-workout",
+  authenticateToken,
+  async (req, res) => {
+    const { workout_id, scheduled_date } = req.body;
+    const user_id = req.user.id;
+
+    if (!workout_id || !user_id || !scheduled_date) {
+      return res.status(400).json({ message: "Invalid request." });
+    }
+
+    try {
+      await workoutDb.run(
+        `
+        UPDATE workouts 
+        SET scheduled_date = ?
+        WHERE workout_id = ? AND user_id = ?
+        `,
+        [scheduled_date, workout_id, user_id]
+      );
+      res.status(200).json({ message: "Workout scheduled successfully." });
+    } catch (err) {
+      console.log(err);
+      return res.status(400).json({ message: "Error scheduling workout." });
+    }
+  }
+);
+
 export default protectedRouter;
