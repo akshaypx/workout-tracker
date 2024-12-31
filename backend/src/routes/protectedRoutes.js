@@ -199,4 +199,28 @@ protectedRouter.post(
   }
 );
 
+//delete workout
+protectedRouter.post("/delete-workout", authenticateToken, async (req, res) => {
+  const { workout_id } = req.body;
+  const user_id = req.user.id;
+
+  if (!workout_id || !user_id) {
+    return res.status(400).json({ message: "Invalid request." });
+  }
+
+  try {
+    await workoutDb.run(
+      `
+        DELETE FROM workouts 
+        WHERE workout_id = ? AND user_id = ?;
+        `,
+      [workout_id, user_id]
+    );
+    res.status(200).json({ message: "Workout deleted successfully." });
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json({ message: "Error deleting workout." });
+  }
+});
+
 export default protectedRouter;
