@@ -17,20 +17,20 @@ let db;
 })();
 
 authRouter.post("/register", async (req, res) => {
-  const { username, password } = req.body;
+  const { username, email, password } = req.body;
 
-  if (!username || !password) {
+  if (!username || !password || !email) {
     return res
       .status(400)
-      .json({ message: "Username and password are required." });
+      .json({ message: "Username, Email and password are required." });
   }
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-    await db.run(`INSERT INTO users (username, password) VALUES (?,?)`, [
-      username,
-      hashedPassword,
-    ]);
+    await db.run(
+      `INSERT INTO Users (username, email, password_hash) VALUES (?,?,?)`,
+      [username, email, hashedPassword]
+    );
     res.status(201).json({ message: "User registered successfully." });
   } catch (error) {
     console.error("Error details:", error);
@@ -43,23 +43,26 @@ authRouter.post("/register", async (req, res) => {
 });
 
 authRouter.post("/login", async (req, res) => {
-  const { username, password } = req.body;
+  const { username, email, password } = req.body;
 
-  if (!username || !password) {
-    res.status(400).json({ message: "Username and password are required." });
+  if ((!username && !email) || !password) {
+    res
+      .status(400)
+      .json({ message: "Username or Email, and password are required." });
   }
 
   try {
-    const user = await db.get(`SELECT * FROM USERS WHERE username = ?`, [
-      username,
-    ]);
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res
-        .status(401)
-        .json({ message: "Username or Password does not match." });
+    let user = undefined;
+    if (username) {
+      user = await db.get(`SELECT * FROM USERS WHERE username = ?`, [username]);
+    } else {
+      user = await db.get(`SELECT * FROM USERS WHERE email = ?`, [email]);
+    }
+    if (!user || !(await bcrypt.compare(password, user.password_hash))) {
+      return res.status(401).json({ message: "Credentials do not match." });
     }
     const token = jwt.sign(
-      { id: user.id, username: user.username },
+      { id: user.id, username: user.username, email: user.email },
       process.env.JWT_SECRET_KEY,
       {
         expiresIn: process.env.JWT_EXPIRY,

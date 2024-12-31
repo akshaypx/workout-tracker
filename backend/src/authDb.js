@@ -9,10 +9,11 @@ async function initializeDatabase() {
 
   await db.exec(
     `
-        CREATE TABLE IF NOT EXISTS users(
-        user_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE,
-        password TEXT
+        CREATE TABLE IF NOT EXISTS Users (
+            user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL,
+            email TEXT NOT NULL UNIQUE,
+            password_hash TEXT NOT NULL
         )
         `
   );
