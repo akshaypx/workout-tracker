@@ -230,12 +230,14 @@ JWT_EXPIRY = 1h
 
 ## **To-Do List**
 
-- [ ] **Create Workout**: Allow users to create workouts composed of multiple exercises.
-- [ ] **Update Workout**: Allow users to update workouts and add comments.
-- [ ] **Delete Workout**: Allow users to delete workouts.
-- [ ] **Schedule Workouts**: Allow users to schedule workouts for specific dates and times.
-- [ ] **List Workouts**: List active or pending workouts sorted by date and time.
-- [ ] **Generate Reports**: Generate reports on past workouts and progress.
+- [x] **Create Workout**: Allow users to create workouts composed of multiple exercises.
+- [x] **Update Workout**: Allow users to update workouts and add comments.
+- [x] **Delete Workout**: Allow users to delete workouts.
+- [x] **Schedule Workouts**: Allow users to schedule workouts for specific dates and times.
+- [x] **List Workouts**: List active or pending workouts sorted by date and time.
+- [x] **Generate Reports**: Generate reports on past workouts and progress.
+- [ ] **Frontend Development**: Develop a Frontend for the backend APIs.
+- [ ] **Testing**: Write tests for all the backend APIs.
 
 ---
 
