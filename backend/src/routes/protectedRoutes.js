@@ -293,4 +293,40 @@ protectedRouter.post(
   }
 );
 
+//get progress for a specific exercise in workout
+protectedRouter.post(
+  "/progress-exercise-workout",
+  authenticateToken,
+  async (req, res) => {
+    let db = req.db;
+
+    const { exercise_id } = req.body;
+
+    const user_id = req.user.id;
+
+    if (!user_id || !exercise_id) {
+      return res.status(400).json({ message: "Invalid request." });
+    }
+
+    try {
+      const progress = await db.all(
+        `
+        SELECT w.scheduled_date, we.sets, we.reps, we.weight, we.duration
+        FROM workout_exercises we
+        JOIN workouts w ON we.workout_id = w.workout_id
+        WHERE w.user_id = ? AND we.exercise_id = ?
+        ORDER BY w.scheduled_date ASC
+        `,
+        [user_id, exercise_id]
+      );
+      return res.status(200).json({ progress });
+    } catch (err) {
+      console.log(err);
+      return res
+        .status(400)
+        .json({ message: "Error generating progress of exercise in workout." });
+    }
+  }
+);
+
 export default protectedRouter;
